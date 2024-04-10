@@ -33,16 +33,16 @@ public class Cube : MonoBehaviour
 
     private List<Rigidbody> GetExplodableObjects()
     {
-        List<Rigidbody> explodableObject = new List<Rigidbody>();
+        List<Rigidbody> explodableObjects = new List<Rigidbody>();
 
         int count = Random.Range(_minCreateValue, _maxCreateValue);
 
         for (int i = 0; i < count; i++)
         {
-            explodableObject.Add(InitializeScaledObject().GetComponent<Rigidbody>());
+            explodableObjects.Add(InitializeScaledObject().GetComponent<Rigidbody>());
         }
 
-        return explodableObject;
+        return explodableObjects;
     }
 
     private Cube InitializeScaledObject()
