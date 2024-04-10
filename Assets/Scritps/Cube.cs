@@ -1,43 +1,62 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Divisor))]
-[RequireComponent(typeof(Exploder))]
+[RequireComponent(typeof(Rigidbody))]
 public class Cube : MonoBehaviour
 {
-    [SerializeField] private Divisor _divisor;
-    [SerializeField] private Exploder _exploder;
+    private int _chanceCount = 1;
+    private int _chanceDivisor = 2;
+    private int _minCreateValue = 2;
+    private int _maxCreateValue = 5;
 
-    private List<IInteractable> _interactObjects;
-    private ChanceData _chanceData;
+    private float _newScale = 0.5f;
+    private float _explodeRadius = 10f;
+    private float _explodeForce = 300f;
 
-    private void Start()
+    private void OnMouseDown()
     {
-        _divisor = GetComponent<Divisor>();
-        _exploder = GetComponent<Exploder>();
-
-        _interactObjects = new List<IInteractable>() { _divisor, _exploder };
-
-        if ((_chanceData = GetComponentInParent<ChanceData>()) == false)
+        if (Random.Range(0, _chanceCount) == 0)
         {
-            throw new NullReferenceException();
+            BlowUp(GetExplodableObjects());
+        }
+
+        Destroy(gameObject);
+    }
+
+    private void BlowUp(List<Rigidbody> explodableObjects)
+    {
+        foreach (var explodableObject in explodableObjects)
+        {
+            explodableObject.AddExplosionForce(_explodeForce, transform.position, _explodeRadius);
         }
     }
 
-    void OnMouseDown()
+    private List<Rigidbody> GetExplodableObjects()
     {
-        int index = 0;
+        List<Rigidbody> explodableObject = new List<Rigidbody>();
 
-        if (UnityEngine.Random.Range(0, _chanceData.Count) > 0)
+        int count = Random.Range(_minCreateValue, _maxCreateValue);
+
+        for (int i = 0; i < count; i++)
         {
-            index++;
+            explodableObject.Add(InitializeScaledObject().GetComponent<Rigidbody>());
         }
 
-        _chanceData.Increase();
+        return explodableObject;
+    }
 
-        _interactObjects[index].Execute();
+    private Cube InitializeScaledObject()
+    {
+        Cube scaledObject = Instantiate(this);
 
-        Destroy(gameObject);
+        scaledObject.transform.localScale *= _newScale;
+        scaledObject.DecreaseChance(_chanceCount);
+
+        return scaledObject;
+    }
+
+    private void DecreaseChance(int chanceCount)
+    {
+        _chanceCount = chanceCount * _chanceDivisor;
     }
 }
